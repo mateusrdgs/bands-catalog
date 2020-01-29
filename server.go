@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
@@ -10,9 +11,6 @@ import (
 
 func main() {
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "hello world")
-	})
 
 	db, err := sql.Open("mysql", "root@tcp(127.0.0.1:3306)/bands_catalog")
 
@@ -22,13 +20,31 @@ func main() {
 
 	defer db.Close()
 
-	// insert, err := db.Query("CALL save_band('Craft', 1998, 'Craft did not perform live until September 2014.', 'Sweden', 'Black Metal')")
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "hello world")
+	})
 
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
+	e.POST("/band", func(c echo.Context) error {
 
-	// defer insert.Close()
+		bandName := c.FormValue("band_name")
+		yearOfFoundation := c.FormValue("year_of_foundation")
+		biography := c.FormValue("biography")
+		country := c.FormValue("country")
+		genre := c.FormValue("genre")
+
+		insert, err := db.Query("CALL save_band(?, ?, ?, ?, ?)", bandName, yearOfFoundation, biography, country, genre)
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		defer insert.Close()
+
+		message := strings.Join([]string{bandName, "was saved successfully"}, " ")
+
+		return c.String(http.StatusOK, message)
+
+	})
 
 	e.Logger.Fatal(e.Start(":1234"))
 }
