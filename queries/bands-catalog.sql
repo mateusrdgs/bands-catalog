@@ -10,3 +10,8 @@ CREATE TABLE bands (
     country VARCHAR(50),
     genre VARCHAR(25)
 );
+
+INSERT INTO bands
+VALUES (uuid(), 'Nine Inch Nails', 1988, 'Founded by Trent Reznor', 'United States', 'Industrial');
+
+SELECT * FROM bands;
