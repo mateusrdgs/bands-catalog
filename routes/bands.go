@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"bands-catalog/models"
+	"bands-catalog/controllers"
 	"database/sql"
-	"net/http"
-	"strings"
 
 	"github.com/labstack/echo"
 )
@@ -12,30 +10,8 @@ import (
 // StartBandsRouting is a function to start the routing of bands module
 func StartBandsRouting(e *echo.Echo, db *sql.DB) {
 
-	e.POST("/band", func(c echo.Context) error {
+	e.GET("/bands", controllers.GetBands(db))
 
-		band := new(models.Band)
-		err := c.Bind(band)
-
-		if err != nil {
-			panic(err.Error())
-		}
-
-		insert, err := db.Query(
-			"CALL insert_band(?, ?, ?, ?, ?)",
-			band.Name, band.YearOfFoundation, band.Biography, band.Country, band.Genre,
-		)
-
-		if err != nil {
-			panic(err.Error())
-		}
-
-		defer insert.Close()
-
-		message := strings.Join([]string{band.Name, "was saved successfully"}, " ")
-
-		return c.String(http.StatusOK, message)
-
-	})
+	e.POST("/band", controllers.InsertBand(db))
 
 }
