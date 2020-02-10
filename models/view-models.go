@@ -13,7 +13,7 @@ type Band struct {
 type Artist struct {
 	Name       string `json:"name" form:"name"`
 	Age        int    `json:"age" form:"age"`
-	Country    string `json:"biography" form:"biography"`
+	Country    string `json:"country" form:"country"`
 	Genre      string `json:"genre" form:"genre"`
 	Biography  string `json:"biography" form:"biography"`
 	Instrument string `json:"instrument" form:"instrument"`
