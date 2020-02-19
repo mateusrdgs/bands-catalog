@@ -12,6 +12,9 @@ func StartBandsRouting(e *echo.Echo, db *sql.DB) {
 
 	e.GET("/bands", controllers.GetBands(db))
 
-	e.POST("/band", controllers.InsertBand(db))
+	g := e.Group("/band")
+
+	g.GET("/:id", controllers.GetBand(db))
+	g.POST("/", controllers.InsertBand(db))
 
 }

@@ -8,5 +8,8 @@ import (
 
 // StartRouting is a function to start the application routing
 func StartRouting(e *echo.Echo, db *sql.DB) {
+
 	StartBandsRouting(e, db)
+	StartAlbumsRouting(e, db)
+
 }

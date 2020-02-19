@@ -21,20 +21,12 @@ func GetBands(db *sql.DB) func(c echo.Context) error {
 
 		defer rows.Close()
 
-		bands := make([]models.Band, 0, 6)
+		bands := make([]models.Band, 0)
 
 		for rows.Next() {
-			var uuid, name, biography, country, genre string
-			var yearOfFoundation int
 			var band models.Band
 
-			rows.Scan(&uuid, &name, &yearOfFoundation, &biography, &country, &genre)
-
-			band.Name = name
-			band.YearOfFoundation = yearOfFoundation
-			band.Biography = biography
-			band.Country = country
-			band.Genre = genre
+			rows.Scan(&band.UUID, &band.Name, &band.YearOfFoundation, &band.Biography, &band.Country, &band.Genre)
 
 			bands = append(bands, band)
 		}
@@ -93,4 +85,31 @@ func InsertBand(db *sql.DB) func(c echo.Context) error {
 
 		return c.String(http.StatusOK, message)
 	}
+}
+
+// GetBand is a controller to fetch a specific band into the database
+func GetBand(db *sql.DB) func(c echo.Context) error {
+
+	return func(c echo.Context) error {
+
+		id := c.Param("id")
+
+		if id == "" {
+			message := "Id wasn't informed"
+			return c.JSON(http.StatusBadRequest, message)
+		}
+
+		query := "SELECT * FROM bands WHERE uuid LIKE ?"
+
+		var band models.Band
+		err := db.QueryRow(query, id).Scan(&band.UUID, &band.Name, &band.YearOfFoundation, &band.Biography, &band.Country, &band.Genre)
+
+		if err != nil {
+			return c.JSON(http.StatusNotFound, "Band not found!")
+		}
+
+		return c.JSON(http.StatusOK, band)
+
+	}
+
 }
