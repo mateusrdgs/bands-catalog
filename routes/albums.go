@@ -9,8 +9,10 @@ import (
 
 // StartAlbumsRouting is a routing handler to albums context inside of routes package
 func StartAlbumsRouting(e *echo.Echo, db *sql.DB) {
+	e.GET("/albums", controllers.GetAlbums(db))
 
-	e.GET("/albums", controllers.GetAlbum(db))
-	e.POST("/album", controllers.InsertAlbum(db))
+	g := e.Group("/album")
 
+	g.GET("/:id", controllers.GetAlbum(db))
+	g.POST("/", controllers.InsertAlbum(db))
 }

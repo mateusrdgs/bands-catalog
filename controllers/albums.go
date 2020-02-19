@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo"
 )
 
-// GetAlbum is a controller to get all albums into catalog database
-func GetAlbum(db *sql.DB) func(c echo.Context) error {
+// GetAlbums is a controller to get all albums into catalog database
+func GetAlbums(db *sql.DB) func(c echo.Context) error {
 
 	return func(c echo.Context) error {
 		rows, err := db.Query(`
@@ -45,6 +45,38 @@ func GetAlbum(db *sql.DB) func(c echo.Context) error {
 
 }
 
+// GetAlbum is a controller to get the specified album into catalog database
+func GetAlbum(db *sql.DB) func(c echo.Context) error {
+	return func(c echo.Context) error {
+		id := c.Param("id")
+
+		if id == "" {
+			message := "Album ID is missing"
+			return c.JSON(http.StatusBadRequest, message)
+		}
+
+		query := `
+			SELECT a.uuid, a.name, a.type, a.release_date, a.label, ba.band_uuid
+			FROM albums as a
+			INNER JOIN bands_albums as ba
+			ON a.uuid LIKE ba.album_uuid
+			WHERE a.uuid LIKE ?
+		`
+		var album models.Album
+
+		row := db.QueryRow(query, id)
+
+		err := row.Scan(&album.UUID, &album.Name, &album.Type, &album.ReleaseDate, &album.Label, &album.BandUUID)
+
+		if err != nil {
+			message := "No album was found"
+			return c.JSON(http.StatusNotFound, message)
+		}
+
+		return c.JSON(http.StatusOK, album)
+	}
+}
+
 // InsertAlbum is a controller to save incoming albums into catalog database
 func InsertAlbum(db *sql.DB) func(c echo.Context) error {
 	return func(c echo.Context) error {
@@ -61,11 +93,11 @@ func InsertAlbum(db *sql.DB) func(c echo.Context) error {
 			album.Name, album.Type, album.ReleaseDate, album.Label, album.BandUUID,
 		)
 
+		defer insert.Close()
+
 		if err != nil {
 			panic(err.Error())
 		}
-
-		defer insert.Close()
 
 		message := strings.Join([]string{album.Name, "was saved successfully"}, " ")
 		return c.JSON(http.StatusOK, message)
