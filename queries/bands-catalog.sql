@@ -175,3 +175,16 @@ CALL insert_artist (
   'Vocals',
   'a69f3558-4960-11ea-bef1-8d5d28b20504'
 );
+
+SELECT a.uuid, a.name, a.type, a.release_date, a.label, ba.band_uuid
+FROM albums as a
+INNER JOIN bands_albums as ba
+ON a.uuid LIKE ba.album_uuid;
+
+SELECT s.uuid, s.name, s.number, s.duration, s.lyrics
+FROM albums AS a
+INNER JOIN albums_songs AS a_s
+ON a.uuid LIKE a_s.album_uuid
+INNER JOIN songs AS s
+ON a_s.song_uuid LIKE s.uuid
+ORDER BY s.number;
